@@ -1,0 +1,313 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<title>Who Are You Really?</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<style>
+*{box-sizing:border-box}
+body{
+  margin:0;
+  min-height:100vh;
+  background:radial-gradient(circle at top,#050b18,#000);
+  color:#fff;
+  font-family:Segoe UI, sans-serif;
+  display:flex;
+  justify-content:center;
+  align-items:center;
+  overflow-x:hidden;
+}
+.app{max-width:760px;width:100%;padding:40px 22px;position:relative}
+.card{
+  background:rgba(255,255,255,.03);
+  border:1px solid rgba(0,160,255,.35);
+  border-radius:18px;
+  padding:30px;
+  box-shadow:0 0 40px rgba(0,160,255,.18);
+  animation:fade .4s ease;
+  position:relative;
+  z-index:1;
+}
+h1,h2{margin-top:0}
+p{line-height:1.7;opacity:.9}
+button{
+  width:100%;
+  margin-top:12px;
+  padding:14px;
+  border-radius:14px;
+  border:1px solid rgba(0,160,255,.4);
+  background:linear-gradient(135deg,#0a1f3a,#031427);
+  color:#fff;
+  font-size:15px;
+  cursor:pointer;
+  transition:.2s;
+}
+button:hover{transform:translateY(-2px)}
+.progress{height:6px;background:#02111f;border-radius:6px;margin-bottom:18px;overflow:hidden}
+.bar{height:100%;background:linear-gradient(90deg,#00bfff,#005eff)}
+@keyframes fade{from{opacity:0;transform:translateY(15px)}to{opacity:1;transform:none)}
+/* Confetti style */
+.confetti{position:absolute;width:8px;height:8px;border-radius:50%;pointer-events:none;z-index:999;}
+</style>
+</head>
+<body>
+<div class="app">
+  <div class="card" id="screen"></div>
+</div>
+
+<script>
+// ===== 25 SOAL ASLI =====
+const questions=[
+{q:"Saat mengambil keputusan besar, kamu lebih memilih…",a:[
+{t:"Analisis data",logic:2},
+{t:"Ikuti perasaan",emotion:2},
+{t:"Ambil risiko",risk:2},
+{t:"Minta saran",empathy:2}
+]},
+{q:"Kegagalan bagimu adalah…",a:[
+{t:"Bahan evaluasi",logic:2},
+{t:"Pukulan emosional",emotion:2},
+{t:"Tantangan",risk:2},
+{t:"Perlu dukungan",empathy:2}
+]},
+{q:"Dalam tim kamu biasanya…",a:[
+{t:"Perencana",logic:2},
+{t:"Penggerak",risk:2},
+{t:"Pendengar",empathy:2},
+{t:"Pemberi semangat",emotion:2}
+]},
+{q:"Jika dikritik keras…",a:[
+{t:"Mengevaluasi",logic:2},
+{t:"Tersinggung",emotion:2},
+{t:"Membuktikan",risk:2},
+{t:"Menjaga hubungan",empathy:2}
+]},
+{q:"Kesuksesan menurutmu adalah…",a:[
+{t:"Stabilitas",logic:2},
+{t:"Kebahagiaan",emotion:2},
+{t:"Pencapaian besar",risk:2},
+{t:"Hubungan baik",empathy:2}
+]},
+{q:"Dalam tekanan waktu…",a:[
+{t:"Tetap rasional",logic:2},
+{t:"Mengikuti insting",emotion:2},
+{t:"Bertindak cepat",risk:2},
+{t:"Koordinasi",empathy:2}
+]},
+{q:"Kamu paling tidak suka…",a:[
+{t:"Kekacauan",logic:2},
+{t:"Drama",emotion:2},
+{t:"Stagnasi",risk:2},
+{t:"Konflik",empathy:2}
+]},
+{q:"Jika rencana gagal…",a:[
+{t:"Susun ulang",logic:2},
+{t:"Kecewa",emotion:2},
+{t:"Cari cara ekstrem",risk:2},
+{t:"Diskusi",empathy:2}
+]},
+{q:"Uang sebaiknya digunakan untuk…",a:[
+{t:"Investasi",logic:2},
+{t:"Kenyamanan hidup",emotion:2},
+{t:"Peluang besar",risk:2},
+{t:"Membantu orang",empathy:2}
+]},
+{q:"Dalam konflik…",a:[
+{t:"Cari solusi",logic:2},
+{t:"Ikuti perasaan",emotion:2},
+{t:"Ambil alih",risk:2},
+{t:"Menjembatani",empathy:2}
+]},
+{q:"Kamu lebih menghargai…",a:[
+{t:"Logika",logic:2},
+{t:"Kejujuran perasaan",emotion:2},
+{t:"Keberanian",risk:2},
+{t:"Empati",empathy:2}
+]},
+{q:"Saat menghadapi risiko…",a:[
+{t:"Menghitung",logic:2},
+{t:"Deg-degan",emotion:2},
+{t:"Tertantang",risk:2},
+{t:"Mencari dukungan",empathy:2}
+]},
+{q:"Kamu bekerja paling baik saat…",a:[
+{t:"Tenang",logic:2},
+{t:"Mood bagus",emotion:2},
+{t:"Target tinggi",risk:2},
+{t:"Kerja tim",empathy:2}
+]},
+{q:"Jika orang tidak setuju…",a:[
+{t:"Jelaskan logis",logic:2},
+{t:"Merasa terganggu",emotion:2},
+{t:"Tetap jalan",risk:2},
+{t:"Mencari titik tengah",empathy:2}
+]},
+{q:"Kamu melihat masa depan dengan…",a:[
+{t:"Perencanaan",logic:2},
+{t:"Harapan",emotion:2},
+{t:"Ambisi",risk:2},
+{t:"Keseimbangan",empathy:2}
+]},
+{q:"Kamu paling nyaman saat…",a:[
+{t:"Sendiri fokus",logic:2},
+{t:"Bersama orang",empathy:2},
+{t:"Menantang diri",risk:2},
+{t:"Ekspresi emosi",emotion:2}
+]},
+{q:"Dalam krisis besar…",a:[
+{t:"Tenang berpikir",logic:2},
+{t:"Panik",emotion:2},
+{t:"Ambil keputusan cepat",risk:2},
+{t:"Menenangkan orang",empathy:2}
+]},
+{q:"Impian bagimu adalah…",a:[
+{t:"Realistis",logic:2},
+{t:"Personal",emotion:2},
+{t:"Besar",risk:2},
+{t:"Bermanfaat",empathy:2}
+]},
+{q:"Jika gagal berulang…",a:[
+{t:"Evaluasi mendalam",logic:2},
+{t:"Lelah emosional",emotion:2},
+{t:"Lebih nekat",risk:2},
+{t:"Cari dukungan",empathy:2}
+]},
+{q:"Kamu menilai orang dari…",a:[
+{t:"Cara berpikir",logic:2},
+{t:"Sikap",empathy:2},
+{t:"Keberanian",risk:2},
+{t:"Kepekaan",emotion:2}
+]},
+{q:"Pilihan hidup harus…",a:[
+{t:"Masuk akal",logic:2},
+{t:"Membahagiakan",emotion:2},
+{t:"Menantang",risk:2},
+{t:"Tidak menyakiti",empathy:2}
+]},
+{q:"Kamu menghadapi ketidakpastian dengan…",a:[
+{t:"Perencanaan",logic:2},
+{t:"Kecemasan",emotion:2},
+{t:"Antusias",risk:2},
+{t:"Diskusi",empathy:2}
+]},
+{q:"Tujuan hidupmu adalah…",a:[
+{t:"Stabilitas",logic:2},
+{t:"Ketenangan",emotion:2},
+{t:"Kesuksesan besar",risk:2},
+{t:"Harmoni",empathy:2}
+]},
+{q:"Jika harus memilih cepat…",a:[
+{t:"Pilihan aman",logic:2},
+{t:"Pilihan hati",emotion:2},
+{t:"Pilihan besar",risk:2},
+{t:"Pilihan adil",empathy:2}
+]},
+{q:"Kamu merasa paling hidup saat…",a:[
+{t:"Berpikir",logic:2},
+{t:"Merasakan",emotion:2},
+{t:"Beraksi",risk:2},
+{t:"Berbagi",empathy:2}
+]}
+];
+
+questions.sort(()=>Math.random()-0.5);
+
+let index=0;
+let stats={logic:0,emotion:0,risk:0,empathy:0};
+const screen=document.getElementById("screen");
+
+// ===== GAME =====
+function showQuestion(){
+  const q=questions[index];
+  screen.innerHTML=`
+  <div class="progress"><div class="bar" style="width:${(index/25)*100}%"></div></div>
+  <h2>${q.q}</h2>
+  ${q.a.map((o,i)=>`<button onclick="choose(${i})">${o.t}</button>`).join("")}
+  `;
+}
+
+function choose(i){
+  const opt=questions[index].a[i];
+  for(let k in opt){if(k!=="t")stats[k]+=opt[k]}
+  index++;
+  index>=25?showResult():showQuestion();
+}
+
+// ===== RESULT + TITLE + REWARD + QUOTE =====
+function showResult(){
+  let type,title,meaning;
+  if(stats.risk>=stats.logic && stats.risk>=stats.emotion){
+    type="Risk Taker";
+    title="The Bold Challenger";
+    meaning="Berani mengambil keputusan besar dan siap menghadapi kegagalan.";
+  }else if(stats.empathy>=stats.logic){
+    type="Empath";
+    title="The Heart Keeper";
+    meaning="Menjaga harmoni dan memahami orang lain dengan dalam.";
+  }else if(stats.emotion>=stats.logic){
+    type="Reactor";
+    title="The Emotional Navigator";
+    meaning="Mengambil keputusan berdasarkan intuisi dan perasaan.";
+  }else{
+    type="Strategist";
+    title="The Long-Term Thinker";
+    meaning="Rasional, visioner, dan fokus pada masa depan.";
+  }
+
+  // SIMPAN KE LOCAL STORAGE
+  localStorage.setItem("lastResult",JSON.stringify({type,title}));
+
+  // tampilkan hasil
+  screen.innerHTML=`
+  <h1>${type}</h1>
+  <p><b>Title:</b> ${title}</p>
+  <p>${meaning}</p>
+  <button onclick="location.reload()">Main Lagi</button>
+  `;
+
+  // ==== REWARD VISUAL =====
+  showReward(title);
+
+  // ==== QUOTE =====
+  const quote = "Pengetahuan tanpa tindakan hanyalah hiburan; keberanian tanpa strategi adalah perjudian.";
+  const quoteEl = document.createElement("p");
+  quoteEl.innerHTML = `"${quote}"<br><span style="font-weight:bold; color:#ff66cc;">— DhikaSukaNonis</span>`;
+  quoteEl.style.marginTop="15px";
+  quoteEl.style.fontStyle="italic";
+  quoteEl.style.color="#00ffff";
+  quoteEl.style.textAlign="center";
+  screen.appendChild(quoteEl);
+}
+
+// ===== REWARD VISUAL =====
+function showReward(title){
+  const badge = document.createElement("div");
+  badge.innerText = `🏆 ${title}`;
+  badge.style.fontSize="20px";
+  badge.style.margin="15px 0";
+  badge.style.textAlign="center";
+  badge.style.color="#00ffff";
+  screen.appendChild(badge);
+
+  // confetti sederhana
+  for(let i=0;i<30;i++){
+    const dot = document.createElement("div");
+    dot.className="confetti";
+    dot.style.background = `hsl(${Math.random()*360},100%,60%)`;
+    dot.style.top = Math.random()*window.innerHeight+"px";
+    dot.style.left = Math.random()*window.innerWidth+"px";
+    document.body.appendChild(dot);
+    setTimeout(()=>dot.remove(),2000);
+  }
+}
+
+// ===== HOME =====
+const last=localStorage.getItem("lastResult");
+screen.innerHTML=`
+<h1>Who Are You Really?</h1>
+<p>Game psikologi dengan 25 pertanyaan.</p>
+${last?`<p><b>Hasil Terakhir:</b> ${JSON.parse(last).type} — ${JSON.parse(last).title}</p>`:""}
+<button onclick="showQuestion()">Mulai</button>`;
+</script>
+</body>
+</html>
